@@ -28,7 +28,7 @@ function standardWin(thisObj){
 			}\
 			box: Panel{orientation:'row',alignChildren:['center','center']}
 		}"
-		
+		//but what if I add....
 		mWin.grp = mWin.add(res); // Uncomment this line to use the contents of the res string.
 
 		function funky(builder){ // Input main group that contains elements to add functionality to
@@ -51,6 +51,7 @@ function standardWin(thisObj){
 				writeLn('xPos: '+objX+' yPos: '+objY); // Debug info
 				mousePos[0] = objX;
 				mousePos[1] = objY;
+				// a lot of stuff...
 				writePos(builder.header,mousePos[0],mousePos[1]);
 				return [objX,objY];
 			}
@@ -77,3 +78,4 @@ function standardWin(thisObj){
 	showGUI(runGUI) //shows the contents of the theGUI() function on screen and centers it.
 }
 standardWin(this);
+//everywhere??!
