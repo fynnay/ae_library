@@ -1,5 +1,5 @@
 // Standard window preset
-// stuffy stuff stuff
+// teeeest
 
 function standardWin(thisObj){
 	function theGUI(thisObj){
