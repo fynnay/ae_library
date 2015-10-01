@@ -1,5 +1,4 @@
 // Standard window preset
-// teeeest
 
 function standardWin(thisObj){
 	function theGUI(thisObj){
@@ -10,28 +9,50 @@ function standardWin(thisObj){
 		}else{
 			var mWin = (thisObj instanceof Panel)? thisObj : new Window("palette","Standard Window", undefined, {resizable:true});
 		}
-        ////////////////////////////
-        //                        //
-        //    ###   ####  ####    //
-        //    #  #  #     #       //
-        //    ###   ###   ####    //
-        //    # #   #        #    //
-        //    #  #  ####  ####    //
-        //                        //
-        ////////////////////////////
+        //    R E S O U R C E    S T R I N G
 		// Add stuff to the res string, to create well aligned layouts.
 		var res =
-		"group{orientation:'column',alignChildren:['fill','fill']\
+		"group{orientation:'column',alignChildren:['fill','top']\
 			header: Group{orientation:'column',alignChildren:['center','top']\
 				xPos: StaticText{text:'',characters:10}\
 				yPos: StaticText{text:'',characters:10}\
 			}\
-			box: Panel{orientation:'row',alignChildren:['center','center']}
+			clips: Panel{orientation:'row',size:['whatever','400'],alignChildren:['center','center'],\
+				text:'Clips',\
+			}\
 		}"
-		//but what if I add....
+		
 		mWin.grp = mWin.add(res); // Uncomment this line to use the contents of the res string.
 
+		//    F U N C T I O N A L I T Y
 		function funky(builder){ // Input main group that contains elements to add functionality to
+			//define root location:
+			var rootF = new File(File.openDialog("Select all frames you wanna import...",true));
+
+
+			//open image sequence and add it to the UI;
+			function addFile(filePath,parent,num){
+				var num = 50;
+				var file = new File(filePath);
+					file.open('r');
+				var newStack = parent.add('group',undefined);
+					newStack.size = [400,400];
+					newStack.alignChildren = 'stack';
+				
+
+				/* C O N T I N U E    H E R E
+				1) Figure out how to add multiple images in a stack (add one by one in a for loop), add the UIImage objects to an array.
+				2) how to loop through them according to mouse position(use show/hide in array);
+				*/
+				// var newClip = newStack.add('image',undefined,file[i]);
+				// 	alert(newClip);
+				// 	clipSize = newClip.image.size;
+				// 	newClip.size = [clipSize[0]*.75,clipSize[1]*.75];
+
+				
+			}
+			addFile(rootF,builder.clips)
+
 			builder.size = [500,500] // Window Size
 
 			var mousePos = [0,0]
@@ -51,12 +72,11 @@ function standardWin(thisObj){
 				writeLn('xPos: '+objX+' yPos: '+objY); // Debug info
 				mousePos[0] = objX;
 				mousePos[1] = objY;
-				// a lot of stuff...
 				writePos(builder.header,mousePos[0],mousePos[1]);
 				return [objX,objY];
 			}
 			// Listen for mouseclicks
-			mWin.addEventListener("mousemove",function(event){updateMouse(event)});
+			mWin.grp.clips.addEventListener("mousemove",function(event){updateMouse(event)});
 
 			return builder;
 		}
@@ -78,4 +98,3 @@ function standardWin(thisObj){
 	showGUI(runGUI) //shows the contents of the theGUI() function on screen and centers it.
 }
 standardWin(this);
-//everywhere??!
