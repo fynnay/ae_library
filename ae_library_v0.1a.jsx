@@ -1,6 +1,8 @@
 ﻿// Standard window preset
 {
-var rootDir = "D:/FYNN/scripting/ae_library_files/ROOT/STUFF/STUFF/Fireball_Day_04"
+var rootDir = "/d/FYNN/scripting/ae_library_files/ROOT/STUFF/"
+// var rootF = new File(File.openDialog("Select all frames you wanna import...",true));
+// alert(rootF);
 function standardWin(thisObj){
 	function theGUI(thisObj){
 		// Check if the script is run from the Window menu or from the file menu as an external script.
@@ -30,8 +32,6 @@ function standardWin(thisObj){
 		function funky(builder){ // Input main group that contains elements to add functionality to
 			builder.size = [500,500] // Window Size
 			var tileSize = [250,200];
-			//define root location:
-			var rootF = new File(File.openDialog("Select all frames you wanna import...",true));
 
 			//    F I L E S
 			// Contains all stacks on this page:
@@ -41,29 +41,27 @@ function standardWin(thisObj){
             // stacks[0][1][0][frame]
             // 
             var stacks = []
+            var clips = 0;
             //    ADD FILES TO GRID
 			function loadCatalog(rootDir){
-				var filePaths = "Fireball_Day_04"
-				var files = filePaths.split(',');
-				alert(files);
-				for(i=0;i<=files.length;i++){
-					var loc = new Folder((rootDir+files[i]));
-					var rootF = loc.getFiles('*.jpg');
-					populateGrid(rootF,builder.grid);
-				}
+				var file1 = rootDir+"Fireball_Day_04"
+				var file2 = rootDir+"Fireball_Day_05"
+				populateGrid(file1,builder.grid);
+				populateGrid(file2,builder.grid);
 			}
-			//loadCatalog(rootDir);
+			loadCatalog(rootDir);
+			alert(stacks[0][0]);
 			//open image sequence and add it to the UI;
 			function populateGrid(filePath,parent){
 				// Make user choose files
-				var file = new File(filePath);
-					file.open('r');
+				var fileP = new Folder(filePath);
+				var file = fileP.getFiles();
 				// Create container group
 				var iGroup = parent.add('panel',undefined);
 					iGroup.size = tileSize;
 					iGroup.orientation = 'stack';
 					iGroup.alignChildren = ['center','top'];
-					iGroup.text = file.parent.name; //call the group the same name as the clip
+					iGroup.text = file.name; //call the group the same name as the clip
 				var inputImages = file.toString().split(','); //convert the input string into an array
 				var images = []; //contains all imported images as UIelements
 				for(i=0;i<inputImages.length;i++){
@@ -76,7 +74,7 @@ function standardWin(thisObj){
 						images.push(newIMG);
 				}
 				var btn = iGroup.add('button')
-					btn.text = file.parent.name;
+					btn.text = file.name;
 					btn.alignment = ['fill','bottom'];
 				var stack = []
 				var posterFrame = Math.ceil(images.length/2-1); //Frame to be shown by default
@@ -85,22 +83,23 @@ function standardWin(thisObj){
 				var group = [];
 				group.push(iGroup,stack);
 				stacks.push(group);
+				// Listen for mouseclicks
+				iGroup.addEventListener("mousemove",function(event){updateFrame(event,clips)});
+				clips++;
 				return group;
 			}
-			populateGrid(rootF,mWin.grp.grid)
-
 
 			function updateFrame(e,clip){
 				var mouseX = updateMouse(e)[0];
-				var width = stacks[0][0].size[0];
-				var numImgs = stacks[0][1][0].length;
+				var width = stacks[clip][0].size[0];
+				var numImgs = stacks[clip][1][0].length;
 				var newFrame = Math.floor(mouseX/width*numImgs);
-				var getCurFrame = stacks[0][1][2];
+				var getCurFrame = stacks[clip][1][2];
 				builder.header.currentFrame.text = newFrame.toString();
-				stacks[0][1][0][getCurFrame].hide();
-				stacks[0][1][2] = newFrame; //set current frame to newFrame
-				stacks[0][1][2] = newFrame; //set groups
-				stacks[0][1][0][newFrame].show();
+				stacks[clip][1][0][getCurFrame].hide();
+				stacks[clip][1][2] = newFrame; //set current frame to newFrame
+				stacks[clip][1][2] = newFrame; //set groups
+				stacks[clip][1][0][newFrame].show();
 			}
 
 			//   M O U S E   P O S I T I O N
@@ -123,8 +122,6 @@ function standardWin(thisObj){
 				writePos(builder.header,mousePos[0],mousePos[1]);
 				return [objX,objY];
 			}
-			// Listen for mouseclicks
-			stacks[0][0].addEventListener("mousemove",function(event){updateFrame(event,1)})
 			return builder;
 		}
 
