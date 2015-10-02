@@ -1,5 +1,8 @@
-// Standard window preset
-
+﻿// Standard window preset
+{
+var rootDir = "/d/FYNN/scripting/ae_library_files/ROOT/STUFF/"
+// var rootF = new File(File.openDialog("Select all frames you wanna import...",true));
+// alert(rootF);
 function standardWin(thisObj){
 	function theGUI(thisObj){
 		// Check if the script is run from the Window menu or from the file menu as an external script.
@@ -16,8 +19,9 @@ function standardWin(thisObj){
 			header: Group{orientation:'column',alignChildren:['center','top']\
 				xPos: StaticText{text:'',characters:10}\
 				yPos: StaticText{text:'',characters:10}\
+				currentFrame: StaticText{text:'',characters:5}\
 			}\
-			clips: Panel{orientation:'row',size:['whatever','400'],alignChildren:['center','center'],\
+			grid: Panel{orientation:'row',size:['whatever','400'],alignChildren:['left','top'],\
 				text:'Clips',\
 			}\
 		}"
@@ -26,35 +30,79 @@ function standardWin(thisObj){
 
 		//    F U N C T I O N A L I T Y
 		function funky(builder){ // Input main group that contains elements to add functionality to
-			//define root location:
-			var rootF = new File(File.openDialog("Select all frames you wanna import...",true));
-
-
-			//open image sequence and add it to the UI;
-			function addFile(filePath,parent,num){
-				var num = 50;
-				var file = new File(filePath);
-					file.open('r');
-				var newStack = parent.add('group',undefined);
-					newStack.size = [400,400];
-					newStack.alignChildren = 'stack';
-				
-
-				/* C O N T I N U E    H E R E
-				1) Figure out how to add multiple images in a stack (add one by one in a for loop), add the UIImage objects to an array.
-				2) how to loop through them according to mouse position(use show/hide in array);
-				*/
-				// var newClip = newStack.add('image',undefined,file[i]);
-				// 	alert(newClip);
-				// 	clipSize = newClip.image.size;
-				// 	newClip.size = [clipSize[0]*.75,clipSize[1]*.75];
-
-				
-			}
-			addFile(rootF,builder.clips)
-
 			builder.size = [500,500] // Window Size
+			var tileSize = [250,200];
 
+			//    F I L E S
+			// Contains all stacks on this page:
+			// stacks[group[stack[[stack],current,poster]]]
+			// 
+            // access single frames in your area:
+            // stacks[0][1][0][frame]
+            // 
+            var stacks = []
+            var clips = 0;
+            //    ADD FILES TO GRID
+			function loadCatalog(rootDir){
+				var file1 = rootDir+"Fireball_Day_04"
+				var file2 = rootDir+"Fireball_Day_05"
+				populateGrid(file1,builder.grid);
+				populateGrid(file2,builder.grid);
+			}
+			loadCatalog(rootDir);
+			alert(stacks[0][0]);
+			//open image sequence and add it to the UI;
+			function populateGrid(filePath,parent){
+				// Make user choose files
+				var fileP = new Folder(filePath);
+				var file = fileP.getFiles();
+				// Create container group
+				var iGroup = parent.add('panel',undefined);
+					iGroup.size = tileSize;
+					iGroup.orientation = 'stack';
+					iGroup.alignChildren = ['center','top'];
+					iGroup.text = file.name; //call the group the same name as the clip
+				var inputImages = file.toString().split(','); //convert the input string into an array
+				var images = []; //contains all imported images as UIelements
+				for(i=0;i<inputImages.length;i++){
+					var newIMG = iGroup.add('image',undefined,inputImages[i]);
+						clipSize = newIMG.image.size;
+						scale = (clipSize[0]-tileSize[0])/100
+						add = 20
+						newIMG.size = [clipSize[0]/scale+add,clipSize[1]/scale+add];
+						newIMG.hide();
+						images.push(newIMG);
+				}
+				var btn = iGroup.add('button')
+					btn.text = file.name;
+					btn.alignment = ['fill','bottom'];
+				var stack = []
+				var posterFrame = Math.ceil(images.length/2-1); //Frame to be shown by default
+				stack.push(images,posterFrame,posterFrame);
+				stack[0][posterFrame].show()
+				var group = [];
+				group.push(iGroup,stack);
+				stacks.push(group);
+				// Listen for mouseclicks
+				iGroup.addEventListener("mousemove",function(event){updateFrame(event,clips)});
+				clips++;
+				return group;
+			}
+
+			function updateFrame(e,clip){
+				var mouseX = updateMouse(e)[0];
+				var width = stacks[clip][0].size[0];
+				var numImgs = stacks[clip][1][0].length;
+				var newFrame = Math.floor(mouseX/width*numImgs);
+				var getCurFrame = stacks[clip][1][2];
+				builder.header.currentFrame.text = newFrame.toString();
+				stacks[clip][1][0][getCurFrame].hide();
+				stacks[clip][1][2] = newFrame; //set current frame to newFrame
+				stacks[clip][1][2] = newFrame; //set groups
+				stacks[clip][1][0][newFrame].show();
+			}
+
+			//   M O U S E   P O S I T I O N
 			var mousePos = [0,0]
 			function writePos(builder,mouseX,mouseY){
 				with(builder){
@@ -64,7 +112,6 @@ function standardWin(thisObj){
 			}
 			writePos(builder.header,mousePos[0],mousePos[1]);
 
-			//   M O U S E   P O S I T I O N
 			function updateMouse(e){
 				var objX = e.clientX.toString();
 				var objY = e.clientY.toString();
@@ -75,9 +122,6 @@ function standardWin(thisObj){
 				writePos(builder.header,mousePos[0],mousePos[1]);
 				return [objX,objY];
 			}
-			// Listen for mouseclicks
-			mWin.grp.clips.addEventListener("mousemove",function(event){updateMouse(event)});
-
 			return builder;
 		}
 
@@ -98,3 +142,5 @@ function standardWin(thisObj){
 	showGUI(runGUI) //shows the contents of the theGUI() function on screen and centers it.
 }
 standardWin(this);
+
+}
